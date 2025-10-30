@@ -1,0 +1,114 @@
+import React, { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Check } from "lucide-react";
+import { motion } from "framer-motion";
+import { createPageUrl } from "@/utils";
+import HeartProgress from "../components/quiz/HeartProgress";
+import QuestionItem from "../components/quiz/QuestionItem";
+
+const questions = [
+  { id: 21, type: 'scale', text: "I prefer to address conflicts immediately rather than wait" },
+  { id: 22, type: 'scale', text: "I can remain calm during heated discussions" },
+  { id: 23, type: 'scale', text: "I listen to understand, not just to respond" },
+  { id: 24, type: 'scale', text: "I am willing to compromise to resolve disagreements" },
+  { id: 25, type: 'scale', text: "I take responsibility for my part in conflicts" },
+  { id: 26, type: 'scale', text: "I avoid raising my voice during arguments" },
+  { id: 27, type: 'scale', text: "I seek to find win-win solutions" },
+  { id: 28, type: 'scale', text: "I give my partner space when they need time to cool down" },
+  { id: 29, type: 'scale', text: "I focus on the issue at hand rather than bringing up past conflicts" },
+  { id: 30, type: 'scale', text: "I am open to seeking outside help if we can't resolve issues on our own" }
+];
+
+const scaleLabels = ["Strongly Agree", "Agree", "Somewhat Agree", "Neutral", "Somewhat Disagree", "Disagree", "Strongly Disagree"];
+const scoreMap = { 0: 7, 1: 6, 2: 5, 3: 4, 4: 3, 5: 2, 6: 1 };
+
+export default function Part3() {
+  const navigate = useNavigate();
+  const [answers, setAnswers] = useState(Array(questions.length).fill(null));
+
+  const handleAnswer = (questionIndex, optionIndex) => {
+    const newAnswers = [...answers];
+    newAnswers[questionIndex] = optionIndex;
+    setAnswers(newAnswers);
+  };
+
+  const answeredCount = useMemo(() => answers.filter(a => a !== null).length, [answers]);
+  const allAnswered = answeredCount === questions.length;
+
+  const handleContinue = () => {
+    if (!allAnswered) return;
+
+    const finalAnswers = answers.map((answerIndex, questionIndex) => ({
+      question_id: questions[questionIndex].id,
+      question: questions[questionIndex].text,
+      answer: scaleLabels[answerIndex],
+      score: scoreMap[answerIndex],
+      part: 3
+    }));
+
+    const existingAnswers = JSON.parse(sessionStorage.getItem('allAnswers') || '[]');
+    sessionStorage.setItem('allAnswers', JSON.stringify([...existingAnswers, ...finalAnswers]));
+    
+    sessionStorage.setItem('currentMilestone', JSON.stringify({
+      partNumber: 3,
+      nextPage: 'Part4'
+    }));
+    
+    navigate(createPageUrl("Milestone"));
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 pb-24">
+      <div className="fixed top-4 left-4 right-4 z-30 flex justify-between items-center">
+        <div className="bg-white/90 backdrop-blur-md shadow-lg rounded-full p-2.5">
+          <HeartProgress 
+            answeredCount={answeredCount}
+            totalQuestions={questions.length}
+          />
+        </div>
+        <div className="bg-white/90 backdrop-blur-md shadow-lg rounded-full px-4 py-2">
+          <span className="text-sm font-semibold text-gray-700">Part 3 of 6</span>
+        </div>
+      </div>
+
+      <main className="max-w-2xl mx-auto pt-24 px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-6"
+        >
+          <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent mb-2">
+            About My Conflicting Style
+          </h1>
+          <p className="text-gray-600 text-sm md:text-base">How you handle disagreements and find resolution</p>
+        </motion.div>
+
+        <div className="bg-white/90 backdrop-blur-sm shadow-xl border-0 rounded-3xl overflow-hidden">
+          {questions.map((question, index) => (
+            <QuestionItem
+              key={question.id}
+              question={question}
+              questionIndex={index}
+              selectedAnswer={answers[index]}
+              onAnswer={handleAnswer}
+            />
+          ))}
+        </div>
+      </main>
+
+      <div className="fixed bottom-0 left-0 right-0 z-20 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-lg">
+        <div className="max-w-2xl mx-auto px-4 py-4">
+          <Button
+            onClick={handleContinue}
+            disabled={!allAnswered}
+            className="w-full h-14 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white shadow-lg text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {allAnswered ? "Complete Part 3" : `${questions.length - answeredCount} questions remaining`}
+            {allAnswered && <Check className="w-5 h-5 ml-2" />}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
