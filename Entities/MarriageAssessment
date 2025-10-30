@@ -1,0 +1,60 @@
+{
+  "name": "MarriageAssessment",
+  "type": "object",
+  "properties": {
+    "user_name": {
+      "type": "string",
+      "description": "Name of the person taking the assessment"
+    },
+    "phone_number": {
+      "type": "string",
+      "description": "User's phone number"
+    },
+    "answers": {
+      "type": "array",
+      "description": "Array of user's answers to quiz questions",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question_id": {
+            "type": "number"
+          },
+          "answer": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "total_score": {
+      "type": "number",
+      "description": "Total score from the assessment"
+    },
+    "compatibility_level": {
+      "type": "string",
+      "enum": [
+        "Excellent",
+        "Very Good",
+        "Good",
+        "Needs Work"
+      ],
+      "description": "Overall compatibility rating"
+    },
+    "completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the assessment is completed"
+    },
+    "paid": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the user has paid for the full report"
+    }
+  },
+  "required": [
+    "user_name",
+    "phone_number"
+  ]
+}
