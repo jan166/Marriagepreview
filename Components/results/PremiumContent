@@ -1,0 +1,72 @@
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { Sparkles, Lock } from 'lucide-react';
+
+const PremiumContent = ({ isPaid, tips, onUnlock }) => {
+  if (isPaid) {
+    return (
+      <div>
+        <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+          <Sparkles className="w-6 h-6 text-rose-500" />
+          Recommendations for Growth
+        </h3>
+        <div className="space-y-4">
+          {tips.map((tip, idx) => (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.7 + idx * 0.1 }}
+              className="flex items-start gap-4 p-4 bg-white rounded-xl border border-gray-100 hover:shadow-md transition-shadow duration-300"
+            >
+              <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-rose-400 to-pink-500 rounded-full flex items-center justify-center text-white font-bold">
+                {idx + 1}
+              </div>
+              <p className="text-gray-700 pt-1">{tip}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative">
+      {/* Blurred Content */}
+      <div className="blur-lg select-none">
+        <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+          <Sparkles className="w-6 h-6 text-rose-500" />
+          Recommendations for Growth
+        </h3>
+        <div className="space-y-4">
+          {tips.map((tip, idx) => (
+            <div key={idx} className="flex items-start gap-4 p-4 bg-gray-100 rounded-xl">
+              <div className="flex-shrink-0 w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center font-bold">
+                {idx + 1}
+              </div>
+              <p className="text-gray-400 pt-1">Lorem ipsum dolor sit amet consectetur.</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center text-center p-8 rounded-2xl">
+        <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mb-4">
+            <Lock className="w-8 h-8 text-white" />
+        </div>
+        <h3 className="text-2xl font-bold text-gray-800 mb-2">Unlock Your Personalized Insights</h3>
+        <p className="text-gray-600 mb-6">Get detailed recommendations and actionable steps to strengthen your relationship.</p>
+        <Button
+          onClick={onUnlock}
+          className="h-12 px-8 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-lg rounded-full shadow-lg"
+        >
+          Unlock Full Report
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+export default PremiumContent;
