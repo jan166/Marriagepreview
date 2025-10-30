@@ -1,0 +1,198 @@
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { base44 } from "@/api/base44Client";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
+import { Check, Loader2, Heart } from "lucide-react";
+import { motion } from "framer-motion";
+import { createPageUrl } from "@/utils";
+import HeartProgress from "../components/quiz/HeartProgress";
+
+const writingQuestions = [
+  {
+    id: 71,
+    question: "What do you appreciate most about your partner? Describe a specific moment or quality that makes you feel grateful."
+  },
+  {
+    id: 72,
+    question: "What is one area in your relationship that you feel could be improved? How do you think you both could work on it together?"
+  },
+  {
+    id: 73,
+    question: "Describe your vision for your relationship in 5 years. What do you hope to achieve together?"
+  }
+];
+
+export default function Part6() {
+  const navigate = useNavigate();
+  const [answers, setAnswers] = useState(["", "", ""]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
+  const [allPreviousAnswers, setAllPreviousAnswers] = useState([]);
+
+  useEffect(() => {
+    const info = sessionStorage.getItem("userInfo");
+    const previousAnswers = sessionStorage.getItem("allAnswers");
+    
+    if (!info || !previousAnswers) {
+      navigate(createPageUrl("UserInfo"));
+      return;
+    }
+    
+    setUserInfo(JSON.parse(info));
+    setAllPreviousAnswers(JSON.parse(previousAnswers));
+  }, [navigate]);
+
+  const handleAnswerChange = (index, value) => {
+    const newAnswers = [...answers];
+    newAnswers[index] = value;
+    setAnswers(newAnswers);
+  };
+
+  const answeredCount = answers.filter(answer => answer.trim().length > 0).length;
+  const allAnswered = answeredCount === writingQuestions.length;
+
+  const handleSubmit = async () => {
+    if (!allAnswered) return;
+    setIsSubmitting(true);
+
+    const writingResponses = answers.map((answer, index) => ({
+      question_id: writingQuestions[index].id,
+      question: writingQuestions[index].question,
+      answer: answer,
+      part: 6
+    }));
+
+    const allAnswers = [...allPreviousAnswers, ...writingResponses];
+    const totalScore = allPreviousAnswers.reduce((sum, ans) => sum + (ans.score || 0), 0);
+    const maxScore = allPreviousAnswers.filter(a => a.score).length * 7;
+    const percentage = (totalScore / maxScore) * 100;
+    
+    let compatibilityLevel;
+    if (percentage >= 85) compatibilityLevel = "Excellent";
+    else if (percentage >= 70) compatibilityLevel = "Very Good";
+    else if (percentage >= 55) compatibilityLevel = "Good";
+    else compatibilityLevel = "Needs Work";
+
+    try {
+      await base44.entities.MarriageAssessment.create({
+        user_name: userInfo.name,
+        phone_number: userInfo.phone,
+        answers: allAnswers,
+        total_score: totalScore,
+        compatibility_level: compatibilityLevel,
+        completed: true
+      });
+
+      sessionStorage.setItem("assessmentResult", JSON.stringify({
+        totalScore,
+        maxScore,
+        percentage,
+        compatibilityLevel,
+        writingResponses
+      }));
+
+      sessionStorage.removeItem('allAnswers');
+      navigate(createPageUrl("Results"));
+    } catch (error) {
+      console.error("Failed to submit assessment:", error);
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!userInfo) return null;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 pb-24">
+      <div className="fixed top-4 left-4 right-4 z-30 flex justify-between items-center">
+        <div className="bg-white/90 backdrop-blur-md shadow-lg rounded-full p-2.5">
+          <HeartProgress 
+            answeredCount={answeredCount}
+            totalQuestions={writingQuestions.length}
+          />
+        </div>
+        <div className="bg-white/90 backdrop-blur-md shadow-lg rounded-full px-4 py-2">
+          <span className="text-sm font-semibold text-gray-700">Part 6 of 6</span>
+        </div>
+      </div>
+
+      <div className="pt-24 pb-6 px-4">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center max-w-2xl mx-auto"
+        >
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-rose-400 to-pink-500 rounded-full mb-4 shadow-lg">
+            <Heart className="w-8 h-8 text-white fill-white" />
+          </div>
+          <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent mb-2">
+            Final Reflections
+          </h1>
+          <p className="text-gray-600 text-sm md:text-base">
+            Share your thoughts to complete your marriage compatibility assessment
+          </p>
+        </motion.div>
+      </div>
+
+      <main className="max-w-2xl mx-auto px-4">
+        <div className="space-y-6">
+          {writingQuestions.map((item, index) => (
+            <motion.div
+              key={item.id}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
+                <CardContent className="p-6 md:p-8">
+                  <div className="flex items-start gap-3 mb-4">
+                    <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-rose-400 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                      {index + 1}
+                    </div>
+                    <h3 className="text-base md:text-lg font-medium text-gray-800 leading-relaxed pt-1">
+                      {item.question}
+                    </h3>
+                  </div>
+                  <Textarea
+                    value={answers[index]}
+                    onChange={(e) => handleAnswerChange(index, e.target.value)}
+                    placeholder="Share your thoughts here..."
+                    className="min-h-32 text-base resize-none"
+                  />
+                  <div className="mt-2 text-sm text-gray-500">
+                    {answers[index].length} characters
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      </main>
+
+      <div className="fixed bottom-0 left-0 right-0 z-20 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-lg">
+        <div className="max-w-2xl mx-auto px-4 py-4">
+          <Button
+            onClick={handleSubmit}
+            disabled={!allAnswered || isSubmitting}
+            className="w-full h-14 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white shadow-lg text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                Calculating Your Results...
+              </>
+            ) : allAnswered ? (
+              <>
+                See Your Results
+                <Check className="w-5 h-5 ml-2" />
+              </>
+            ) : (
+              `Please answer all ${writingQuestions.length} questions`
+            )}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
