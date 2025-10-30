@@ -1,0 +1,114 @@
+import React, { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Check } from "lucide-react";
+import { motion } from "framer-motion";
+import { createPageUrl } from "@/utils";
+import HeartProgress from "../components/quiz/HeartProgress";
+import QuestionItem from "../components/quiz/QuestionItem";
+
+const questions = [
+  { id: 11, type: 'scale', text: "My partner and I have different communication styles" },
+  { id: 12, type: 'scale', text: "We handle stress differently in our relationship" },
+  { id: 13, type: 'scale', text: "Our approaches to problem-solving often differ" },
+  { id: 14, type: 'scale', text: "We have different levels of need for alone time" },
+  { id: 15, type: 'scale', text: "Our spending habits and financial priorities differ" },
+  { id: 16, type: 'scale', text: "We express affection in different ways" },
+  { id: 17, type: 'scale', text: "Our social needs and preferences are different" },
+  { id: 18, type: 'scale', text: "We have different expectations about household responsibilities" },
+  { id: 19, type: 'scale', text: "Our ideas about work-life balance differ" },
+  { id: 20, type: 'scale', text: "We approach conflict resolution differently" }
+];
+
+const scaleLabels = ["Strongly Agree", "Agree", "Somewhat Agree", "Neutral", "Somewhat Disagree", "Disagree", "Strongly Disagree"];
+const scoreMap = { 0: 7, 1: 6, 2: 5, 3: 4, 4: 3, 5: 2, 6: 1 };
+
+export default function Part2() {
+  const navigate = useNavigate();
+  const [answers, setAnswers] = useState(Array(questions.length).fill(null));
+
+  const handleAnswer = (questionIndex, optionIndex) => {
+    const newAnswers = [...answers];
+    newAnswers[questionIndex] = optionIndex;
+    setAnswers(newAnswers);
+  };
+
+  const answeredCount = useMemo(() => answers.filter(a => a !== null).length, [answers]);
+  const allAnswered = answeredCount === questions.length;
+
+  const handleContinue = () => {
+    if (!allAnswered) return;
+
+    const finalAnswers = answers.map((answerIndex, questionIndex) => ({
+      question_id: questions[questionIndex].id,
+      question: questions[questionIndex].text,
+      answer: scaleLabels[answerIndex],
+      score: scoreMap[answerIndex],
+      part: 2
+    }));
+
+    const existingAnswers = JSON.parse(sessionStorage.getItem('allAnswers') || '[]');
+    sessionStorage.setItem('allAnswers', JSON.stringify([...existingAnswers, ...finalAnswers]));
+    
+    sessionStorage.setItem('currentMilestone', JSON.stringify({
+      partNumber: 2,
+      nextPage: 'Part3'
+    }));
+    
+    navigate(createPageUrl("Milestone"));
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 pb-24">
+      <div className="fixed top-4 left-4 right-4 z-30 flex justify-between items-center">
+        <div className="bg-white/90 backdrop-blur-md shadow-lg rounded-full p-2.5">
+          <HeartProgress 
+            answeredCount={answeredCount}
+            totalQuestions={questions.length}
+          />
+        </div>
+        <div className="bg-white/90 backdrop-blur-md shadow-lg rounded-full px-4 py-2">
+          <span className="text-sm font-semibold text-gray-700">Part 2 of 6</span>
+        </div>
+      </div>
+
+      <main className="max-w-2xl mx-auto pt-24 px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-6"
+        >
+          <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent mb-2">
+            Different Parts With Your Partner
+          </h1>
+          <p className="text-gray-600 text-sm md:text-base">Recognizing and understanding your differences</p>
+        </motion.div>
+
+        <div className="bg-white/90 backdrop-blur-sm shadow-xl border-0 rounded-3xl overflow-hidden">
+          {questions.map((question, index) => (
+            <QuestionItem
+              key={question.id}
+              question={question}
+              questionIndex={index}
+              selectedAnswer={answers[index]}
+              onAnswer={handleAnswer}
+            />
+          ))}
+        </div>
+      </main>
+
+      <div className="fixed bottom-0 left-0 right-0 z-20 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-lg">
+        <div className="max-w-2xl mx-auto px-4 py-4">
+          <Button
+            onClick={handleContinue}
+            disabled={!allAnswered}
+            className="w-full h-14 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white shadow-lg text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {allAnswered ? "Complete Part 2" : `${questions.length - answeredCount} questions remaining`}
+            {allAnswered && <Check className="w-5 h-5 ml-2" />}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
