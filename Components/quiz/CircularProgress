@@ -1,0 +1,31 @@
+import React from 'react';
+
+const CircularProgress = ({ current, total }) => {
+  const getPath = (quadrant) => {
+    switch (quadrant) {
+      case 1: return "M 50 50 L 50 0 A 50 50 0 0 1 100 50 Z";
+      case 2: return "M 50 50 L 100 50 A 50 50 0 0 1 50 100 Z";
+      case 3: return "M 50 50 L 50 100 A 50 50 0 0 1 0 50 Z";
+      case 4: return "M 50 50 L 0 50 A 50 50 0 0 1 50 0 Z";
+      default: return "";
+    }
+  };
+
+  return (
+    <div className="w-12 h-12 md:w-14 md:h-14">
+      <svg viewBox="0 0 100 100" className="transform -rotate-90">
+        {[1, 2, 3, 4].map(q => (
+          <path
+            key={q}
+            d={getPath(q)}
+            fill={q <= current ? "#2563eb" : "#e5e7eb"}
+            stroke="#ffffff"
+            strokeWidth="3"
+          />
+        ))}
+      </svg>
+    </div>
+  );
+};
+
+export default CircularProgress;
