@@ -1,0 +1,97 @@
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Home, TrendingUp, Star, Trophy, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
+import { createPageUrl } from "@/utils";
+import PremiumContent from "../components/results/PremiumContent";
+
+export default function Results() {
+  const navigate = useNavigate();
+  const [result, setResult] = useState(null);
+  const [userName, setUserName] = useState("");
+  const [isPaid, setIsPaid] = useState(false);
+
+  useEffect(() => {
+    const paymentStatus = sessionStorage.getItem('paymentStatus');
+    if (paymentStatus === 'paid') {
+      setIsPaid(true);
+    }
+
+    const userInfo = sessionStorage.getItem("userInfo");
+    const assessmentResult = sessionStorage.getItem("assessmentResult");
+    
+    if (!userInfo || !assessmentResult) {
+      navigate(createPageUrl("Home"));
+      return;
+    }
+    
+    setUserName(JSON.parse(userInfo).name);
+    setResult(JSON.parse(assessmentResult));
+  }, [navigate]);
+
+  if (!result) return null;
+
+  const getInsights = () => {
+    const level = result.compatibilityLevel;
+    const insights = {
+      "Excellent": {
+        icon: Trophy,
+        color: "from-green-500 to-emerald-500",
+        title: "Outstanding Compatibility!",
+        description: "Your relationship shows exceptional strength across all areas. You have excellent communication, trust, and shared values.",
+        tips: [
+          "Continue nurturing your strong foundation by scheduling weekly 'State of the Union' meetings to check in emotionally.",
+          "Keep exploring new experiences together, like taking a dance class, learning a new language, or planning a spontaneous weekend trip.",
+          "Maintain your open communication style by practicing reflective listening, even on small topics, to deepen understanding."
+        ]
+      },
+      "Very Good": {
+        icon: Star,
+        color: "from-blue-500 to-cyan-500",
+        title: "Strong Compatibility!",
+        description: "Your relationship is built on solid ground with great potential. You have strong communication and mutual respect.",
+        tips: [
+          "Work on deepening emotional intimacy by asking deeper, more open-ended questions daily, such as 'What made you feel most alive today?'",
+          "Address minor conflicts proactively with the '5-5-5' method: 5 minutes each to talk, 5 minutes to find a solution, 5 minutes to celebrate resolution.",
+          "Continue building on your strengths by creating a 'Relationship Bucket List' of things you want to achieve together in the next year."
+        ]
+      },
+      "Good": {
+        icon: TrendingUp,
+        color: "from-yellow-500 to-orange-500",
+        title: "Growing Compatibility",
+        description: "Your relationship has a good foundation with room for improvement. Focus on strengthening communication and trust.",
+        tips: [
+          "Prioritize quality time together by scheduling one tech-free date night per week where you focus entirely on each other.",
+          "Work on conflict resolution skills by using 'I feel' statements instead of 'You always' accusations to reduce defensiveness.",
+          "Discuss long-term goals openly by creating a shared 1-year, 5-year, and 10-year vision board that reflects both your dreams."
+        ]
+      },
+      "Needs Work": {
+        icon: Sparkles,
+        color: "from-rose-500 to-pink-500",
+        title: "Growth Opportunity",
+        description: "Your relationship has key areas that need attention to build a stronger connection. This is a chance to grow together.",
+        tips: [
+          "Consider seeking professional relationship counseling to get guided support from a licensed therapist who specializes in couples.",
+          "Practice active listening: for 10 minutes a day, one person talks while the other only listens without interrupting or problem-solving.",
+          "Rebuild trust through small, consistent actions. Start with a '30-Day Honesty Challenge' where you commit to transparent communication."
+        ]
+      }
+    };
+    return insights[level];
+  };
+
+  const insights = getInsights();
+  const IconComponent = insights.icon;
+
+  const handleUnlock = () => {
+    navigate(createPageUrl("Payment"));
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 relative overflow-hidden">
+      {/* Decorative elements */}
+      <div className="absolute inset-0">
