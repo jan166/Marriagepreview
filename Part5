@@ -1,0 +1,138 @@
+import React, { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Check } from "lucide-react";
+import { motion } from "framer-motion";
+import { createPageUrl } from "@/utils";
+import HeartProgress from "../components/quiz/HeartProgress";
+import QuestionItem from "../components/quiz/QuestionItem";
+
+const questions = [
+  { id: 51, type: 'multiple', text: "How often do you have meaningful conversations with your partner?", options: ["Daily", "Several times a week", "Once a week", "Rarely"] },
+  { id: 52, type: 'multiple', text: "How do you typically celebrate special occasions together?", options: ["Romantic dinner or outing", "Quiet celebration at home", "Party with friends and family", "Don't usually celebrate"] },
+  { id: 53, type: 'multiple', text: "What's your approach to household chores?", options: ["We split them equally", "One person handles most", "We take turns based on schedule", "We hire help when possible"] },
+  { id: 54, type: 'multiple', text: "How do you make financial decisions as a couple?", options: ["Discuss everything together", "Split responsibilities by category", "One person manages finances", "Keep finances mostly separate"] },
+  { id: 55, type: 'multiple', text: "How often do you go on dates or special outings?", options: ["Weekly", "Monthly", "Few times a year", "Rarely"] },
+  { id: 56, type: 'multiple', text: "What's your preferred way to spend a free evening together?", options: ["Going out for activities", "Cooking and eating at home", "Watching movies or shows", "Each doing our own thing"] },
+  { id: 57, type: 'multiple', text: "How do you handle disagreements about extended family?", options: ["Discuss openly and find compromise", "Support each other's family bonds", "Keep some distance from the issue", "It causes ongoing tension"] },
+  { id: 58, type: 'multiple', text: "What's your approach to future planning as a couple?", options: ["Regular discussions and shared goals", "General agreement on direction", "Different individual plans", "Prefer to live in the present"] },
+  { id: 59, type: 'multiple', text: "How do you support each other's personal growth?", options: ["Actively encourage and participate", "Supportive but independent", "Give space when needed", "Don't focus much on this"] },
+  { id: 60, type: 'scale', text: "We have a strong emotional connection" },
+  { id: 61, type: 'scale', text: "We laugh together frequently" },
+  { id: 62, type: 'scale', text: "We support each other's dreams and aspirations" },
+  { id: 63, type: 'scale', text: "We handle stress well as a team" },
+  { id: 64, type: 'scale', text: "We trust each other completely" },
+  { id: 65, type: 'scale', text: "We communicate our needs effectively" },
+  { id: 66, type: 'scale', text: "We make each other feel valued and appreciated" },
+  { id: 67, type: 'scale', text: "We have compatible life goals" },
+  { id: 68, type: 'scale', text: "We respect each other's boundaries" },
+  { id: 69, type: 'scale', text: "We enjoy spending time together" },
+  { id: 70, type: 'scale', text: "We feel secure in our relationship" }
+];
+
+const scaleLabels = ["Strongly Agree", "Agree", "Somewhat Agree", "Neutral", "Somewhat Disagree", "Disagree", "Strongly Disagree"];
+const scoreMap = { 0: 7, 1: 6, 2: 5, 3: 4, 4: 3, 5: 2, 6: 1 };
+const multipleChoiceScoreMap = { 0: 7, 1: 5, 2: 3, 3: 1 };
+
+export default function Part5() {
+  const navigate = useNavigate();
+  const [answers, setAnswers] = useState(Array(questions.length).fill(null));
+
+  const handleAnswer = (questionIndex, optionIndex) => {
+    const newAnswers = [...answers];
+    newAnswers[questionIndex] = optionIndex;
+    setAnswers(newAnswers);
+  };
+
+  const answeredCount = useMemo(() => answers.filter(a => a !== null).length, [answers]);
+  const allAnswered = answeredCount === questions.length;
+
+  const handleContinue = () => {
+    if (!allAnswered) return;
+
+    const finalAnswers = answers.map((answerIndex, questionIndex) => {
+      const question = questions[questionIndex];
+      if (question.type === 'scale') {
+        return {
+          question_id: question.id,
+          question: question.text,
+          answer: scaleLabels[answerIndex],
+          score: scoreMap[answerIndex],
+          part: 5
+        };
+      } else {
+        return {
+          question_id: question.id,
+          question: question.text,
+          answer: question.options[answerIndex],
+          score: multipleChoiceScoreMap[answerIndex],
+          part: 5
+        };
+      }
+    });
+
+    const existingAnswers = JSON.parse(sessionStorage.getItem('allAnswers') || '[]');
+    sessionStorage.setItem('allAnswers', JSON.stringify([...existingAnswers, ...finalAnswers]));
+    
+    sessionStorage.setItem('currentMilestone', JSON.stringify({
+      partNumber: 5,
+      nextPage: 'Part6'
+    }));
+    
+    navigate(createPageUrl("Milestone"));
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 pb-24">
+      <div className="fixed top-4 left-4 right-4 z-30 flex justify-between items-center">
+        <div className="bg-white/90 backdrop-blur-md shadow-lg rounded-full p-2.5">
+          <HeartProgress 
+            answeredCount={answeredCount}
+            totalQuestions={questions.length}
+          />
+        </div>
+        <div className="bg-white/90 backdrop-blur-md shadow-lg rounded-full px-4 py-2">
+          <span className="text-sm font-semibold text-gray-700">Part 5 of 6</span>
+        </div>
+      </div>
+
+      <main className="max-w-2xl mx-auto pt-24 px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-6"
+        >
+          <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent mb-2">
+            About Us
+          </h1>
+          <p className="text-gray-600 text-sm md:text-base">Your relationship dynamics and connection</p>
+        </motion.div>
+
+        <div className="bg-white/90 backdrop-blur-sm shadow-xl border-0 rounded-3xl overflow-hidden">
+          {questions.map((question, index) => (
+            <QuestionItem
+              key={question.id}
+              question={question}
+              questionIndex={index}
+              selectedAnswer={answers[index]}
+              onAnswer={handleAnswer}
+            />
+          ))}
+        </div>
+      </main>
+
+      <div className="fixed bottom-0 left-0 right-0 z-20 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-lg">
+        <div className="max-w-2xl mx-auto px-4 py-4">
+          <Button
+            onClick={handleContinue}
+            disabled={!allAnswered}
+            className="w-full h-14 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white shadow-lg text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {allAnswered ? "Complete Part 5" : `${questions.length - answeredCount} questions remaining`}
+            {allAnswered && <Check className="w-5 h-5 ml-2" />}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
