@@ -1,97 +1,128 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Check, Lock, CreditCard, Sparkles, Loader2 } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { createPageUrl } from '@/utils';
+import React, { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Check } from "lucide-react";
+import { motion } from "framer-motion";
+import { createPageUrl } from "@/utils";
+import HeartProgress from "../components/quiz/HeartProgress";
+import QuestionItem from "../components/quiz/QuestionItem";
 
-export default function PaymentPage() {
+const questions = [
+  { id: 1, type: 'scale', text: "I am confident in my ability to handle challenges" },
+  { id: 2, type: 'scale', text: "I often reflect on my emotions and feelings" },
+  { id: 3, type: 'scale', text: "I am comfortable expressing my needs to others" },
+  { id: 4, type: 'scale', text: "I value my independence and personal space" },
+  { id: 5, type: 'scale', text: "I am open to feedback and constructive criticism" },
+  { id: 6, type: 'scale', text: "I prioritize self-care and personal well-being" },
+  { id: 7, type: 'scale', text: "I am adaptable to change and new situations" },
+  { id: 8, type: 'scale', text: "I trust my instincts when making decisions" },
+  { id: 9, type: 'scale', text: "I feel secure in who I am as a person" },
+  { id: 10, type: 'scale', text: "I am generally optimistic about my future" }
+];
+
+const scaleLabels = ["Strongly Agree", "Agree", "Somewhat Agree", "Neutral", "Somewhat Disagree", "Disagree", "Strongly Disagree"];
+const scoreMap = { 0: 7, 1: 6, 2: 5, 3: 4, 4: 3, 5: 2, 6: 1 };
+
+export default function Part1() {
   const navigate = useNavigate();
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [answers, setAnswers] = useState(Array(questions.length).fill(null));
+  const [userInfo, setUserInfo] = useState(null);
 
-  const features = [
-    "In-depth analysis of your answers",
-    "Personalized growth recommendations",
-    "Actionable tips to strengthen your bond",
-    "A printable PDF of your full report"
-  ];
+  useEffect(() => {
+    const info = sessionStorage.getItem("userInfo");
+    if (!info) {
+      navigate(createPageUrl("UserInfo"));
+      return;
+    }
+    setUserInfo(JSON.parse(info));
+  }, [navigate]);
 
-  const handlePayment = () => {
-    setIsProcessing(true);
-    setTimeout(() => {
-      sessionStorage.setItem('paymentStatus', 'paid');
-      setIsProcessing(false);
-      navigate(createPageUrl("Results"), { replace: true });
-    }, 2000);
+  const handleAnswer = (questionIndex, optionIndex) => {
+    const newAnswers = [...answers];
+    newAnswers[questionIndex] = optionIndex;
+    setAnswers(newAnswers);
   };
 
+  const answeredCount = useMemo(() => answers.filter(a => a !== null).length, [answers]);
+  const allAnswered = answeredCount === questions.length;
+
+  const handleContinue = () => {
+    if (!allAnswered) return;
+
+    const finalAnswers = answers.map((answerIndex, questionIndex) => ({
+      question_id: questions[questionIndex].id,
+      question: questions[questionIndex].text,
+      answer: scaleLabels[answerIndex],
+      score: scoreMap[answerIndex],
+      part: 1
+    }));
+
+    const existingAnswers = JSON.parse(sessionStorage.getItem('allAnswers') || '[]');
+    sessionStorage.setItem('allAnswers', JSON.stringify([...existingAnswers, ...finalAnswers]));
+    
+    sessionStorage.setItem('currentMilestone', JSON.stringify({
+      partNumber: 1,
+      nextPage: 'Part2'
+    }));
+    
+    navigate(createPageUrl("Milestone"));
+  };
+
+  if (!userInfo) return null;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-lg"
-      >
-        <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-sm">
-          <CardHeader className="text-center p-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full mx-auto mb-4">
-              <Sparkles className="w-8 h-8 text-white" />
-            </div>
-            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Unlock Your Full Report
-            </CardTitle>
-            <CardDescription className="text-lg text-gray-600 mt-2">
-              Get the complete blueprint to your relationship's future.
-            </CardDescription>
-          </CardHeader>
+    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 pb-24">
+      <div className="fixed top-4 left-4 right-4 z-30 flex justify-between items-center">
+        <div className="bg-white/90 backdrop-blur-md shadow-lg rounded-full p-2.5">
+          <HeartProgress 
+            answeredCount={answeredCount}
+            totalQuestions={questions.length}
+          />
+        </div>
+        <div className="bg-white/90 backdrop-blur-md shadow-lg rounded-full px-4 py-2">
+          <span className="text-sm font-semibold text-gray-700">Part 1 of 6</span>
+        </div>
+      </div>
 
-          <CardContent className="p-8">
-            <div className="text-center mb-8">
-              <span className="text-5xl font-bold text-gray-800">$9.99</span>
-              <span className="text-gray-500">/ one-time payment</span>
-            </div>
+      <main className="max-w-2xl mx-auto pt-24 px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-6"
+        >
+          <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent mb-2">
+            About Myself
+          </h1>
+          <p className="text-gray-600 text-sm md:text-base">Understanding your self-awareness and personal growth</p>
+        </motion.div>
 
-            <div className="space-y-4 mb-8">
-              <h3 className="font-semibold text-gray-700">What you'll get:</h3>
-              {features.map((feature, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 + index * 0.1 }}
-                  className="flex items-center gap-3"
-                >
-                  <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                    <Check className="w-4 h-4 text-green-600" />
-                  </div>
-                  <span className="text-gray-700">{feature}</span>
-                </motion.div>
-              ))}
-            </div>
-          </CardContent>
-          
-          <CardFooter className="p-8">
-            <Button
-              onClick={handlePayment}
-              disabled={isProcessing}
-              className="w-full h-14 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-lg rounded-xl shadow-xl hover:shadow-2xl transition-all px-6"
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <CreditCard className="w-5 h-5 mr-2" />
-                  Pay Now & Get Full Access
-                </>
-              )}
-            </Button>
-          </CardFooter>
-        </Card>
-      </motion.div>
+        <div className="bg-white/90 backdrop-blur-sm shadow-xl border-0 rounded-3xl overflow-hidden">
+          {questions.map((question, index) => (
+            <QuestionItem
+              key={question.id}
+              question={question}
+              questionIndex={index}
+              selectedAnswer={answers[index]}
+              onAnswer={handleAnswer}
+            />
+          ))}
+        </div>
+      </main>
+
+      <div className="fixed bottom-0 left-0 right-0 z-20 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-lg">
+        <div className="max-w-2xl mx-auto px-4 py-4">
+          <Button
+            onClick={handleContinue}
+            disabled={!allAnswered}
+            className="w-full h-14 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white shadow-lg text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {allAnswered
+              ? "Complete Part 1"
+              : `${questions.length - answeredCount} questions remaining`}
+            {allAnswered && <Check className="w-5 h-5 ml-2" />}
+          </Button>
+        </div>
+      </div>
     </div>
   );
+}
