@@ -5,13 +5,13 @@ import { Check } from 'lucide-react';
 const QuestionItem = ({ question, questionIndex, selectedAnswer, onAnswer }) => {
   const getCircleSize = (index) => {
     const sizes = [
-      'w-11 h-11 sm:w-14 sm:h-14',  // 0 - Strongly Agree (largest)
-      'w-9 h-9 sm:w-12 sm:h-12',    // 1 - Agree
-      'w-8 h-8 sm:w-10 sm:h-10',    // 2 - Somewhat Agree
+      'w-11 h-11 sm:w-14 sm:h-14',  // 0 - Strongly Disagree (largest)
+      'w-9 h-9 sm:w-12 sm:h-12',    // 1 - Disagree
+      'w-8 h-8 sm:w-10 sm:h-10',    // 2 - Somewhat Disagree
       'w-6 h-6 sm:w-8 sm:h-8',      // 3 - Neutral (smallest)
-      'w-8 h-8 sm:w-10 sm:h-10',    // 4 - Somewhat Disagree
-      'w-9 h-9 sm:w-12 sm:h-12',    // 5 - Disagree
-      'w-11 h-11 sm:w-14 sm:h-14'   // 6 - Strongly Disagree (largest)
+      'w-8 h-8 sm:w-10 sm:h-10',    // 4 - Somewhat Agree
+      'w-9 h-9 sm:w-12 sm:h-12',    // 5 - Agree
+      'w-11 h-11 sm:w-14 sm:h-14'   // 6 - Strongly Agree (largest)
     ];
     return sizes[index];
   };
@@ -41,40 +41,44 @@ const QuestionItem = ({ question, questionIndex, selectedAnswer, onAnswer }) => 
       {question.type === 'scale' ? (
         <div className="mb-4">
           <div className="flex justify-between items-center mb-6 gap-1 sm:gap-2">
-            {Array.from({ length: 7 }, (_, idx) => (
-              <motion.button
-                key={idx}
-                onClick={() => onAnswer(questionIndex, idx)}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex flex-col items-center"
-              >
-                <div
-                  className={`${getCircleSize(idx)} rounded-full border-2 transition-all duration-300 flex items-center justify-center ${
-                    selectedAnswer === idx
-                      ? idx <= 2 
-                        ? 'bg-gradient-to-br from-green-400 to-emerald-500 border-green-500 shadow-lg'
-                        : idx === 3
-                        ? 'bg-gradient-to-br from-gray-300 to-gray-400 border-gray-400 shadow-lg'
-                        : 'bg-gradient-to-br from-purple-400 to-pink-500 border-purple-500 shadow-lg'
-                      : idx <= 2
-                      ? 'border-green-300 hover:border-green-400 hover:bg-green-50'
-                      : idx === 3
-                      ? 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
-                      : 'border-purple-300 hover:border-purple-400 hover:bg-purple-50'
-                  }`}
+            {Array.from({ length: 7 }, (_, idx) => {
+              // Reverse the index for display (0->6, 1->5, etc.)
+              const reversedIdx = 6 - idx;
+              return (
+                <motion.button
+                  key={idx}
+                  onClick={() => onAnswer(questionIndex, reversedIdx)}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex flex-col items-center"
                 >
-                  {selectedAnswer === idx && (
-                    <Check className={`${getCheckSize(idx)} text-white`} />
-                  )}
-                </div>
-              </motion.button>
-            ))}
+                  <div
+                    className={`${getCircleSize(idx)} rounded-full border-2 transition-all duration-300 flex items-center justify-center ${
+                      selectedAnswer === reversedIdx
+                        ? idx >= 4
+                          ? 'bg-gradient-to-br from-green-400 to-emerald-500 border-green-500 shadow-lg'
+                          : idx === 3
+                          ? 'bg-gradient-to-br from-gray-300 to-gray-400 border-gray-400 shadow-lg'
+                          : 'bg-gradient-to-br from-purple-400 to-pink-500 border-purple-500 shadow-lg'
+                        : idx >= 4
+                        ? 'border-green-300 hover:border-green-400 hover:bg-green-50'
+                        : idx === 3
+                        ? 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                        : 'border-purple-300 hover:border-purple-400 hover:bg-purple-50'
+                    }`}
+                  >
+                    {selectedAnswer === reversedIdx && (
+                      <Check className={`${getCheckSize(idx)} text-white`} />
+                    )}
+                  </div>
+                </motion.button>
+              );
+            })}
           </div>
           
           <div className="flex justify-between items-center">
-            <span className="text-xs md:text-sm font-medium text-green-700">Agree</span>
             <span className="text-xs md:text-sm font-medium text-purple-700">Disagree</span>
+            <span className="text-xs md:text-sm font-medium text-green-700">Agree</span>
           </div>
         </div>
       ) : (
