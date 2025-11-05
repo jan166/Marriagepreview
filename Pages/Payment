@@ -14,7 +14,9 @@ export default function PaymentPage() {
     "In-depth analysis of your answers",
     "Personalized growth recommendations",
     "Actionable tips to strengthen your bond",
-    "A printable PDF of your full report"
+    "Communication patterns analysis",
+    "Long-term relationship roadmap",
+    "Areas for growth with detailed guidance"
   ];
 
   const handlePayment = () => {
@@ -63,7 +65,7 @@ export default function PaymentPage() {
                   transition={{ delay: 0.2 + index * 0.1 }}
                   className="flex items-center gap-3"
                 >
-                  <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                  <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
                     <Check className="w-4 h-4 text-green-600" />
                   </div>
                   <span className="text-gray-700">{feature}</span>
@@ -72,7 +74,7 @@ export default function PaymentPage() {
             </div>
           </CardContent>
           
-          <CardFooter className="p-8">
+          <CardFooter className="p-8 pt-0">
             <Button
               onClick={handlePayment}
               disabled={isProcessing}
@@ -95,3 +97,4 @@ export default function PaymentPage() {
       </motion.div>
     </div>
   );
+}
