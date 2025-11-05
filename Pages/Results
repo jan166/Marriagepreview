@@ -2,10 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Home, TrendingUp, Star, Trophy, Sparkles } from "lucide-react";
+import { Home, Lock, Heart, Share2, Phone } from "lucide-react";
 import { motion } from "framer-motion";
 import { createPageUrl } from "@/utils";
-import PremiumContent from "../components/results/PremiumContent";
 
 export default function Results() {
   const navigate = useNavigate();
@@ -37,7 +36,6 @@ export default function Results() {
     const level = result.compatibilityLevel;
     const insights = {
       "Excellent": {
-        icon: Trophy,
         color: "from-green-500 to-emerald-500",
         title: "Outstanding Compatibility!",
         description: "Your relationship shows exceptional strength across all areas. You have excellent communication, trust, and shared values.",
@@ -45,10 +43,19 @@ export default function Results() {
           "Continue nurturing your strong foundation by scheduling weekly 'State of the Union' meetings to check in emotionally.",
           "Keep exploring new experiences together, like taking a dance class, learning a new language, or planning a spontaneous weekend trip.",
           "Maintain your open communication style by practicing reflective listening, even on small topics, to deepen understanding."
+        ],
+        strengthAreas: [
+          "Exceptional emotional connection",
+          "Strong communication patterns",
+          "Aligned life goals and values",
+          "Healthy conflict resolution"
+        ],
+        growthAreas: [
+          "Continue date nights to maintain romance",
+          "Explore new shared hobbies together"
         ]
       },
       "Very Good": {
-        icon: Star,
         color: "from-blue-500 to-cyan-500",
         title: "Strong Compatibility!",
         description: "Your relationship is built on solid ground with great potential. You have strong communication and mutual respect.",
@@ -56,10 +63,20 @@ export default function Results() {
           "Work on deepening emotional intimacy by asking deeper, more open-ended questions daily, such as 'What made you feel most alive today?'",
           "Address minor conflicts proactively with the '5-5-5' method: 5 minutes each to talk, 5 minutes to find a solution, 5 minutes to celebrate resolution.",
           "Continue building on your strengths by creating a 'Relationship Bucket List' of things you want to achieve together in the next year."
+        ],
+        strengthAreas: [
+          "Good communication foundation",
+          "Mutual respect and trust",
+          "Shared values in key areas",
+          "Willingness to work together"
+        ],
+        growthAreas: [
+          "Deepen emotional intimacy",
+          "Practice active listening more consistently",
+          "Align on long-term goals"
         ]
       },
       "Good": {
-        icon: TrendingUp,
         color: "from-yellow-500 to-orange-500",
         title: "Growing Compatibility",
         description: "Your relationship has a good foundation with room for improvement. Focus on strengthening communication and trust.",
@@ -67,10 +84,21 @@ export default function Results() {
           "Prioritize quality time together by scheduling one tech-free date night per week where you focus entirely on each other.",
           "Work on conflict resolution skills by using 'I feel' statements instead of 'You always' accusations to reduce defensiveness.",
           "Discuss long-term goals openly by creating a shared 1-year, 5-year, and 10-year vision board that reflects both your dreams."
+        ],
+        strengthAreas: [
+          "Basic trust established",
+          "Commitment to the relationship",
+          "Some shared interests",
+          "Desire for improvement"
+        ],
+        growthAreas: [
+          "Improve communication patterns",
+          "Build deeper emotional connection",
+          "Develop better conflict resolution",
+          "Align on major life decisions"
         ]
       },
       "Needs Work": {
-        icon: Sparkles,
         color: "from-rose-500 to-pink-500",
         title: "Growth Opportunity",
         description: "Your relationship has key areas that need attention to build a stronger connection. This is a chance to grow together.",
@@ -78,6 +106,18 @@ export default function Results() {
           "Consider seeking professional relationship counseling to get guided support from a licensed therapist who specializes in couples.",
           "Practice active listening: for 10 minutes a day, one person talks while the other only listens without interrupting or problem-solving.",
           "Rebuild trust through small, consistent actions. Start with a '30-Day Honesty Challenge' where you commit to transparent communication."
+        ],
+        strengthAreas: [
+          "Awareness of issues",
+          "Willingness to assess the relationship",
+          "Potential for growth",
+          "Care for each other"
+        ],
+        growthAreas: [
+          "Rebuild trust and communication",
+          "Address core conflicts",
+          "Seek professional guidance",
+          "Realign expectations and goals"
         ]
       }
     };
@@ -85,13 +125,329 @@ export default function Results() {
   };
 
   const insights = getInsights();
-  const IconComponent = insights.icon;
 
   const handleUnlock = () => {
     navigate(createPageUrl("Payment"));
   };
 
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: 'My Marriage Compatibility Report',
+        text: `I just completed my marriage compatibility assessment! Check out LoveSync to discover your relationship insights.`,
+        url: window.location.origin
+      });
+    } else {
+      // Fallback: copy link to clipboard
+      navigator.clipboard.writeText(window.location.origin);
+      alert('Link copied to clipboard!');
+    }
+  };
+
+  const BlurredSection = ({ title, lines = 4 }) => (
+    <div className="relative mb-8">
+      <h3 className="text-xl font-bold text-gray-800 mb-4">{title}</h3>
+      <div className="blur-sm select-none space-y-3">
+        {Array.from({ length: lines }).map((_, idx) => (
+          <div key={idx} className="h-4 bg-gray-200 rounded" style={{ width: `${85 + Math.random() * 15}%` }} />
+        ))}
+      </div>
+      <div className="absolute inset-0 flex items-center justify-center bg-white/70 backdrop-blur-sm rounded-xl">
+        <Button
+          onClick={handleUnlock}
+          className="bg-gray-900 hover:bg-black text-white px-8 py-6 rounded-lg shadow-xl text-base"
+        >
+          view full result
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 relative overflow-hidden">
       {/* Decorative elements */}
       <div className="absolute inset-0">
+        <div className="absolute top-20 right-20 w-96 h-96 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" />
+        <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse delay-1000" />
+      </div>
+
+      <div className="relative z-10 min-h-screen flex items-center justify-center px-4 py-12">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6 }}
+          className="w-full max-w-3xl"
+        >
+          {/* Header */}
+          <div className="text-center mb-8">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 150 }}
+              className={`inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br ${insights.color} rounded-full mb-4 shadow-2xl`}
+            >
+              <Heart className="w-10 h-10 text-white fill-white" />
+            </motion.div>
+            <h1 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">
+              {userName}'s Marriage Compatibility Report
+            </h1>
+            <p className="text-lg text-gray-600">{insights.title}</p>
+          </div>
+
+          {/* Results Card */}
+          <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-sm mb-6">
+            <CardContent className="p-6 md:p-10">
+              
+              {/* 1. Overall Assessment - Always Visible */}
+              <div className="bg-gradient-to-r from-rose-50 to-pink-50 rounded-xl p-6 mb-8 border border-pink-100">
+                <h3 className="text-xl font-bold text-gray-800 mb-3">Overall Assessment</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  {insights.description}
+                </p>
+              </div>
+
+              {/* 2. Your Strengths - Always Visible */}
+              <div className="mb-8">
+                <h3 className="text-xl font-bold text-gray-800 mb-4">Your Relationship Strengths</h3>
+                <div className="space-y-2">
+                  {insights.strengthAreas.map((strength, idx) => (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.6 + idx * 0.1 }}
+                      className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-100"
+                    >
+                      <div className="w-2 h-2 bg-green-500 rounded-full" />
+                      <span className="text-gray-700">{strength}</span>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 3. Key Insights - Always Visible */}
+              <div className="mb-8">
+                <h3 className="text-xl font-bold text-gray-800 mb-4">Key Insights</h3>
+                <div className="bg-blue-50 rounded-xl p-6 border border-blue-100">
+                  <p className="text-gray-700 leading-relaxed">
+                    Based on your responses, your relationship demonstrates {result.compatibilityLevel === "Excellent" ? "exceptional" : result.compatibilityLevel === "Very Good" ? "strong" : result.compatibilityLevel === "Good" ? "promising" : "developing"} patterns in communication and emotional connection. Understanding these patterns is the first step toward building an even stronger bond.
+                  </p>
+                </div>
+              </div>
+
+              {/* 4. Blurred Section - Areas for Growth */}
+              {!isPaid ? (
+                <BlurredSection title="Areas for Growth" lines={5} />
+              ) : (
+                <div className="mb-8">
+                  <h3 className="text-xl font-bold text-gray-800 mb-4">Areas for Growth</h3>
+                  <div className="space-y-2">
+                    {insights.growthAreas.map((area, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg border border-orange-100"
+                      >
+                        <div className="w-2 h-2 bg-orange-500 rounded-full" />
+                        <span className="text-gray-700">{area}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 5. Communication Style - Always Visible */}
+              <div className="mb-8">
+                <h3 className="text-xl font-bold text-gray-800 mb-4">Your Communication Style</h3>
+                <div className="bg-purple-50 rounded-xl p-6 border border-purple-100">
+                  <p className="text-gray-700 leading-relaxed">
+                    {result.compatibilityLevel === "Excellent" 
+                      ? "You and your partner have developed an excellent communication rhythm. You express yourselves clearly and listen actively to each other's perspectives."
+                      : result.compatibilityLevel === "Very Good"
+                      ? "Your communication shows strong foundations with room for even deeper connection. You're on the right track to excellent communication patterns."
+                      : "Your communication style is developing. With focus and practice, you can build stronger patterns that will significantly enhance your relationship."
+                    }
+                  </p>
+                </div>
+              </div>
+
+              {/* 6. Blurred Section - Personalized Recommendations */}
+              {!isPaid ? (
+                <BlurredSection title="Personalized Recommendations" lines={6} />
+              ) : (
+                <div className="mb-8">
+                  <h3 className="text-xl font-bold text-gray-800 mb-4">Personalized Recommendations</h3>
+                  <div className="space-y-4">
+                    {insights.tips.map((tip, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-start gap-4 p-4 bg-white rounded-xl border border-gray-100 shadow-sm"
+                      >
+                        <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-rose-400 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                          {idx + 1}
+                        </div>
+                        <p className="text-gray-700 pt-1">{tip}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 7. Relationship Dynamics - Always Visible */}
+              <div className="mb-8">
+                <h3 className="text-xl font-bold text-gray-800 mb-4">Relationship Dynamics</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-gradient-to-br from-rose-50 to-pink-50 rounded-xl p-5 border border-pink-100">
+                    <h4 className="font-semibold text-gray-800 mb-2">Emotional Connection</h4>
+                    <p className="text-sm text-gray-600">
+                      Your emotional bond shows {result.compatibilityLevel === "Excellent" || result.compatibilityLevel === "Very Good" ? "strong" : "developing"} intimacy and understanding.
+                    </p>
+                  </div>
+                  <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-5 border border-blue-100">
+                    <h4 className="font-semibold text-gray-800 mb-2">Conflict Resolution</h4>
+                    <p className="text-sm text-gray-600">
+                      You handle disagreements with {result.compatibilityLevel === "Excellent" ? "mature" : result.compatibilityLevel === "Very Good" ? "good" : "developing"} problem-solving approaches.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* 8. Blurred Section - Long-term Roadmap */}
+              {!isPaid ? (
+                <BlurredSection title="Long-term Relationship Roadmap" lines={5} />
+              ) : (
+                <div className="mb-8">
+                  <h3 className="text-xl font-bold text-gray-800 mb-4">Long-term Relationship Roadmap</h3>
+                  <div className="space-y-4">
+                    <div className="border-l-4 border-rose-500 pl-4 py-2">
+                      <h4 className="font-semibold text-gray-800 mb-1">Next 3 Months</h4>
+                      <p className="text-gray-600 text-sm">
+                        Implement daily connection rituals and practice active listening. Schedule weekly date nights.
+                      </p>
+                    </div>
+                    <div className="border-l-4 border-pink-500 pl-4 py-2">
+                      <h4 className="font-semibold text-gray-800 mb-1">6-12 Months</h4>
+                      <p className="text-gray-600 text-sm">
+                        Deepen emotional intimacy, align on major life goals, and establish healthy conflict resolution patterns.
+                      </p>
+                    </div>
+                    <div className="border-l-4 border-purple-500 pl-4 py-2">
+                      <h4 className="font-semibold text-gray-800 mb-1">Long-term (1+ Years)</h4>
+                      <p className="text-gray-600 text-sm">
+                        Continue growing together, revisit goals regularly, and maintain the strong foundation you're building.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* CTA for Free Consulting */}
+          {!isPaid && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+              className="mb-6"
+            >
+              <Card className="shadow-xl border-0 bg-gradient-to-br from-purple-50 to-pink-50">
+                <CardContent className="p-8 text-center">
+                  <Phone className="w-12 h-12 text-purple-600 mx-auto mb-4" />
+                  <h3 className="text-2xl font-bold text-gray-800 mb-2">Want Expert Guidance?</h3>
+                  <p className="text-gray-600 mb-6">
+                    Book a free 30-minute consultation with our relationship experts to discuss your results and get personalized advice.
+                  </p>
+                  <Button
+                    onClick={() => window.open('https://calendly.com', '_blank')}
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-6 rounded-xl shadow-lg text-base"
+                  >
+                    Book Free Consulting
+                  </Button>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Summary Card */}
+          <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm mb-6">
+            <CardContent className="p-6 md:p-10">
+              <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">Your Relationship Summary</h3>
+              
+              <div className="bg-gradient-to-br from-rose-100 via-pink-100 to-purple-100 rounded-2xl p-8 mb-6">
+                <div className="text-center mb-6">
+                  <div className={`inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br ${insights.color} rounded-full mb-4`}>
+                    <Heart className="w-8 h-8 text-white fill-white" />
+                  </div>
+                  <h4 className="text-2xl font-bold text-gray-800 mb-2">{insights.title}</h4>
+                  <p className="text-gray-700">{insights.description}</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                  <div className="bg-white/80 rounded-xl p-4 text-center">
+                    <div className="text-3xl mb-2">💪</div>
+                    <div className="text-sm font-semibold text-gray-700">Communication</div>
+                    <div className="text-xs text-gray-500 mt-1">{result.compatibilityLevel === "Excellent" || result.compatibilityLevel === "Very Good" ? "Strong" : "Growing"}</div>
+                  </div>
+                  <div className="bg-white/80 rounded-xl p-4 text-center">
+                    <div className="text-3xl mb-2">❤️</div>
+                    <div className="text-sm font-semibold text-gray-700">Connection</div>
+                    <div className="text-xs text-gray-500 mt-1">{result.compatibilityLevel === "Excellent" ? "Exceptional" : result.compatibilityLevel === "Very Good" ? "Strong" : "Developing"}</div>
+                  </div>
+                  <div className="bg-white/80 rounded-xl p-4 text-center">
+                    <div className="text-3xl mb-2">🎯</div>
+                    <div className="text-sm font-semibold text-gray-700">Goals Alignment</div>
+                    <div className="text-xs text-gray-500 mt-1">{result.compatibilityLevel === "Excellent" || result.compatibilityLevel === "Very Good" ? "Aligned" : "In Progress"}</div>
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                onClick={handleShare}
+                variant="outline"
+                className="w-full h-12 text-base rounded-xl border-2 border-pink-300 hover:bg-pink-50"
+              >
+                <Share2 className="w-5 h-5 mr-2" />
+                Share Your Results
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Action Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1 }}
+            className="flex flex-col gap-4"
+          >
+            <Button
+              onClick={() => {
+                sessionStorage.clear();
+                navigate(createPageUrl("Home"));
+              }}
+              variant="outline"
+              className="w-full h-14 text-lg rounded-xl border-2"
+            >
+              <Home className="w-5 h-5 mr-2" />
+              Back to Home
+            </Button>
+          </motion.div>
+
+          {/* Thank You Message */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.2 }}
+            className="text-center mt-8"
+          >
+            <p className="text-gray-600">
+              Thank you, <span className="font-semibold text-gray-800">{userName}</span>, for taking the time to complete this assessment! 💕
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              We hope these insights help you build an even stronger relationship.
+            </p>
+          </motion.div>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
