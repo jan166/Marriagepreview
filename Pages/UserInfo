@@ -95,4 +95,41 @@ export default function UserInfo() {
                 <div className="space-y-2">
                   <Label htmlFor="phone" className="text-gray-700 font-medium">
                     Phone Number
- 
+                  </Label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="Enter your phone number"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      className={`pl-11 h-12 ${errors.phone ? 'border-red-500' : ''}`}
+                    />
+                  </div>
+                  {errors.phone && (
+                    <p className="text-red-500 text-sm">{errors.phone}</p>
+                  )}
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full h-12 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
+                >
+                  Continue
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </form>
+
+              <div className="mt-6 text-center">
+                <p className="text-xs text-gray-500">
+                  🔒 Your information is kept private and secure
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
